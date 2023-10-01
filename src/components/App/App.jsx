@@ -1,93 +1,84 @@
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
-import { ListContainer } from "../index";
+import { ListContainer, TaskForm } from "../index";
 import { tasksService } from "../../services/tasksService";
 import { ERROR_MESSAGE } from "../../constants/messages";
-import Grid from '@mui/material/Grid';
+import { Container, Grid } from "@mui/material";
 
 export const App = () => {
   const [list, setList] = useState([]);
-  const [state, updateState] = useState([]);
+  const [state, updateState] = useState({
+    toDo: {
+      title: "To Do",
+      items: [],
+    },
+    completed: {
+      title: "Completed",
+      items: [],
+    },
+  });
+
+  const refreshList = useCallback(async () => {
+    setList(await tasksService.get().catch(alert));
+  }, []);
 
   useEffect(() => {
-    (async () => setList(await tasksService.get().catch(alert)))();
-  }, []);
+    refreshList();
+  }, [refreshList]);
 
-  const moveItemToAnotherContainer = useCallback((startIndex, finalIndex) => {
-    updateState((prevState) => {
-      const state = [...prevState];
-      const element = state[startIndex].items.shift();
-      state[finalIndex].items.unshift(element);
-      return state;
-    });
-  }, []);
+  const updateStatus = useCallback(
+    (id, payload) => {
+      tasksService.put(id, payload).finally(refreshList);
+    },
+    [refreshList]
+  );
 
-  const removeItemFromDashboard = useCallback((coloumnIndex) => {
-    updateState((prevState) => {
-      const currentList = prevState[coloumnIndex].items;
-      const removedItem = currentList[currentList.length - 1];
-
-      (async (id) => {
-        if (id) {
-          return await tasksService.detele(id).then(() => {
-            updateState((prevState) => {
-              const state = [...prevState];
-              state[coloumnIndex].items.pop();
-              return state;
-            });
-          });
-        }
-      })(removedItem?.id);
-
-      return prevState;
-    });
-  }, []);
+  const removeItem = useCallback(
+    (id) => {
+      tasksService.detele(id).finally(refreshList);
+    },
+    [refreshList]
+  );
 
   useEffect(() => {
     if (list.length) {
-      updateState([
-        {
+      updateState({
+        toDo: {
           title: "To Do",
-          items: [...list],
-          actions: [
-            {
-              handler: () => moveItemToAnotherContainer(0, 1),
-              name: "Mark Completed",
-            },
-          ],
+          items: [...list.filter((item) => !item.completed)],
         },
-        {
+        completed: {
           title: "Completed",
-          items: [],
-          actions: [
-            {
-              handler: () => moveItemToAnotherContainer(1, 0),
-              name: "Mark Incompleted",
-            },
-            {
-              handler: () => removeItemFromDashboard(1),
-              name: "Remove",
-            },
-          ],
+          items: [...list.filter((item) => item.completed)],
         },
-      ]);
+      });
     }
   }, [list]);
 
   return (
-    <Grid container spacing={2} >
-      {(state &&
-        list.length &&
-        state.map((coloumn, index) => (
-          <Grid item xs={12/state.length} key={index}>
+    <Container maxWidth="md">
+      <TaskForm submitHandler={refreshList}></TaskForm>
+      {list.length ? (
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
             <ListContainer
-              title={coloumn.title}
-              itemsList={coloumn.items}
-              primaryAction={coloumn.actions[0]}
-              secondaryAction={coloumn.actions[1]}
+              title={state.toDo.title}
+              itemsList={state.toDo.items}
+              primaryAction={updateStatus}
             />
           </Grid>
-        ))) || <h2>{ERROR_MESSAGE}</h2>}
-    </Grid>
+          <Grid item xs={6}>
+            <ListContainer
+              title={state.completed.title}
+              itemsList={state.completed.items}
+              primaryAction={updateStatus}
+              secondaryAction={removeItem}
+            />
+          </Grid>
+        </Grid>
+      ) : (
+        <h3>{ERROR_MESSAGE}</h3>
+      )}
+    </Container>
   );
 };

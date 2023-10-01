@@ -1,1 +1,1 @@
-export const ERROR_MESSAGE = "Sorry, failed to fetch data from API";
+export const ERROR_MESSAGE = "No data...";
