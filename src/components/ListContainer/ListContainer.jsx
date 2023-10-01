@@ -1,31 +1,41 @@
 import React from "react";
 import { ListRow } from "../index";
 import { ActionButton } from "../index";
-import "./ListContainer.sass";
+import { Typography, Box, List } from "@mui/material";
 
 export const ListContainer = ({
   itemsList,
+  title,
   primaryAction,
   secondaryAction,
 }) => {
   return (
-    <div className="list-container">
-      <div>
+    <Box sx={{ border: "1px solid #ccc" }}>
+      <Typography variant="h4" sx={{ textAlign: "center" }}>
+        {title}
+      </Typography>
+      <List sx={{ height: "70vh", overflow: "auto" }}>
         {itemsList &&
           itemsList.map((item, index) => (
             <ListRow key={index}>{item.title}</ListRow>
           ))}
-      </div>
-      <div>
-        <ActionButton actionHandler={primaryAction.handler}>
+      </List>
+      <Box sx={{ textAlign: "center" }}>
+        <ActionButton
+          actionHandler={primaryAction.handler}
+          disabled={itemsList.length < 1}
+        >
           {primaryAction.name}
         </ActionButton>
         {secondaryAction ? (
-          <ActionButton actionHandler={secondaryAction.handler}>
+          <ActionButton
+            actionHandler={secondaryAction.handler}
+            disabled={itemsList.length < 1}
+          >
             {secondaryAction.name}
           </ActionButton>
         ) : null}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

@@ -1,11 +1,16 @@
 import React from "react";
 import Button from "@mui/material/Button";
 
-export const ActionButton = ({ children, actionHandler }) => {
+export const ActionButton = ({ children, actionHandler, disabled }) => {
   return (
     <>
       {actionHandler ? (
-        <Button onClick={actionHandler} variant="contained" sx={{ m: 1 }}>
+        <Button
+          disabled={disabled}
+          onClick={actionHandler}
+          variant="contained"
+          sx={{ m: 2 }}
+        >
           {children}
         </Button>
       ) : null}

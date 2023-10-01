@@ -52,7 +52,7 @@ export const App = () => {
           actions: [
             {
               handler: () => moveItemToAnotherContainer(0, 1),
-              name: "Move to Completed",
+              name: "Mark Completed",
             },
           ],
         },
@@ -61,8 +61,12 @@ export const App = () => {
           items: [],
           actions: [
             {
+              handler: () => moveItemToAnotherContainer(1, 0),
+              name: "Mark Incompleted",
+            },
+            {
               handler: () => removeItemFromDashboard(1),
-              name: "Remove last item",
+              name: "Remove",
             },
           ],
         },
@@ -71,7 +75,7 @@ export const App = () => {
   }, [list]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} >
       {(state &&
         list.length &&
         state.map((coloumn, index) => (
@@ -79,8 +83,8 @@ export const App = () => {
             <ListContainer
               title={coloumn.title}
               itemsList={coloumn.items}
-              primaryAction={coloumn.items.length && coloumn.actions[0]}
-              secondaryAction={coloumn.items.length && coloumn.actions[1]}
+              primaryAction={coloumn.actions[0]}
+              secondaryAction={coloumn.actions[1]}
             />
           </Grid>
         ))) || <h2>{ERROR_MESSAGE}</h2>}

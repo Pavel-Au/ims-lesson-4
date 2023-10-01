@@ -1,6 +1,6 @@
 import React from "react";
-import "./ListRow.sass";
+import ListItem from '@mui/material/ListItem';
 
 export const ListRow = ({ children }) => {
-  return <div className="list-row">{children}</div>;
+  return <ListItem>{children}</ListItem>;
 };
