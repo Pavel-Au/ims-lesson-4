@@ -1,64 +1,16 @@
 import React from "react";
-import { useCallback, useEffect, useState } from "react";
 import { ListContainer, TaskForm } from "../index";
-import { tasksService } from "../../services/tasksService";
 import { ERROR_MESSAGE } from "../../constants/messages";
 import { Container, Grid } from "@mui/material";
+import { useTaskList } from "../../hooks/useTaskList";
 
 export const App = () => {
-  const [list, setList] = useState([]);
-  const [state, updateState] = useState({
-    toDo: {
-      title: "To Do",
-      items: [],
-    },
-    completed: {
-      title: "Completed",
-      items: [],
-    },
-  });
-
-  const refreshList = useCallback(async () => {
-    setList(await tasksService.get().catch(alert));
-  }, []);
-
-  useEffect(() => {
-    refreshList();
-  }, [refreshList]);
-
-  const updateStatus = useCallback(
-    (id, payload) => {
-      tasksService.put(id, payload).finally(refreshList);
-    },
-    [refreshList]
-  );
-
-  const removeItem = useCallback(
-    (id) => {
-      tasksService.detele(id).finally(refreshList);
-    },
-    [refreshList]
-  );
-
-  useEffect(() => {
-    if (list.length) {
-      updateState({
-        toDo: {
-          title: "To Do",
-          items: [...list.filter((item) => !item.completed)],
-        },
-        completed: {
-          title: "Completed",
-          items: [...list.filter((item) => item.completed)],
-        },
-      });
-    }
-  }, [list]);
+  const { state, updateStatus, removeItem, refreshList } = useTaskList();
 
   return (
     <Container maxWidth="md">
       <TaskForm submitHandler={refreshList}></TaskForm>
-      {list.length ? (
+      {state.toDo.items.length || state.toDo.items.length ? (
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <ListContainer
